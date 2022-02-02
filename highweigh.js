@@ -239,11 +239,26 @@ class Roadmap {
   }
 }
 
+async function loadData() {
+  if (window.jsyaml) {
+    const response = await fetch("data.yaml");
+    if (response.ok) {
+      const yaml = await response.text();
+      return jsyaml.load(yaml, {schema: jsyaml.JSON_SCHEMA});
+    }
+  }
+
+  const jsonResponse = await fetch("data.json");
+  if (jsonResponse.ok) {
+    return await jsonResponse.json();
+  }
+
+  throw "neither data.yaml nor data.json found";
+}
+
 window.addEventListener("load", async () => {
   try {
-    const response = await fetch("data.json");
-    const data = await response.json();
-
+    const data = await loadData();
     new Roadmap(data).draw()
   }
   catch (e) {
